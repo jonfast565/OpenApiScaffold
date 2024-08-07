@@ -1,0 +1,12 @@
+from typing import ClassVar, Optional
+
+{{#each this.classes}}
+class {{this.name}}(object):
+    {{#each this.properties}}
+    {{this.name}} : Optional[{{this.type}}] = None
+    {{/each}}
+    def __init__(self, {{#each this.properties}} {{this.name}} {{#unless @last}},{{/unless}} {{/each}}):
+        {{#each this.properties}}
+        self.{{this.name}} = {{this.name}}
+        {{/each}}
+{{/each}}

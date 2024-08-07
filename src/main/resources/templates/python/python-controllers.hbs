@@ -1,0 +1,23 @@
+import requests
+from typing import ClassVar
+import jsonpickle
+from models import *
+
+baseAddress = '{{baseAddress}}'
+headers = { 'x-wl-api-key': '[[api key here]]' }
+
+{{#each paths}}
+def {{pathName}}({{#each allVariables}}{{name}}{{#unless @last}},{{/unless}} {{/each}}):
+    url = f'{{url}}'
+    {{#if queryList}} params = { {{#each queryList}}
+        '{{name}}': {{name}}{{#unless @last}},{{/unless}}
+    {{/each}}
+    }{{/if}}
+    {{#if responses}}r = {{/if}}requests.{{operationType}}(url, headers=headers {{#if queryList}}, params=params{{/if}}{{#if body}}, body=body{{/if}})
+    r.raise_for_status()
+    {{#each responses}}
+    jsonString = r.json()
+    result = jsonPickle.decode(jsonString{{#if customType}}, classes={{#if isArray}}list[{{/if}}{{customType}}{{#if isArray}}]{{/if}}{{/if}})
+    {{/each}}
+    return result
+{{/each}}

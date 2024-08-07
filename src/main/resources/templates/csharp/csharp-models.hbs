@@ -1,0 +1,10 @@
+using System;
+
+{{#each this.classes}}
+    public class {{this.name}}
+    {
+    {{#each this.properties}}
+        public {{this.type}} {{this.name}} { get; set; }
+    {{/each}}
+    }
+{{/each}}

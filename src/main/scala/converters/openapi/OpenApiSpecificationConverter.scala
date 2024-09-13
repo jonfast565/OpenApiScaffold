@@ -124,14 +124,17 @@ object OpenApiSpecificationConverter {
 
   private def getPathResult(response: responses.ApiResponse, statusCode: String): PathResponse = {
     try {
-      val objectSchema = response.getContent.get("application/json")
-      if (objectSchema != null) {
-        val actualSchema = objectSchema.getSchema
-        val `type` = getTypeFromSchema(actualSchema)
-        new PathResponse() {
-          setType(`type`)
-          setStatusCode(statusCode)
-        }
+      val objectSchemaContent = response.getContent
+      if (objectSchemaContent != null) {
+        val objectSchema = objectSchemaContent.get("application/json")
+        if (objectSchema != null) {
+          val actualSchema = objectSchema.getSchema
+          val `type` = getTypeFromSchema(actualSchema)
+          new PathResponse() {
+            setType(`type`)
+            setStatusCode(statusCode)
+          }
+        } else null
       } else null
     } catch {
       case e: Exception =>

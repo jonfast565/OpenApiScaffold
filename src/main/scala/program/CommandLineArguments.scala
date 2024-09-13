@@ -22,7 +22,7 @@ import scala.compiletime.uninitialized
 class CommandLineArguments extends Callable[Int] {
 
   @Parameters(index = "0", description = Array("The URL containing the swagger.json file"),
-    defaultValue = "https://localhost:56826/swagger/v1/swagger.json")
+    defaultValue = "https://localhost:58640/swagger/v1/swagger.json")
   private var url: String = uninitialized
 
   @Parameters(index = "1", description = Array("The name of the client"), defaultValue = "Firehose")

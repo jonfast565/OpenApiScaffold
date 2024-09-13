@@ -30,9 +30,14 @@ object OpenApiSpecificationConverter {
     for ((name, schema) <- objects.asScala) {
       var classProps = List[PropertySpecification]()
       val properties = schema.getProperties
+      if (properties != null) {
       for ((property, propSchema) <- properties.asScala) {
         val mapKey = property
-        classProps = classProps ++ List(PropertySpecification(mapKey, getTypeFromSchema(propSchema)))
+          val propSpec = PropertySpecification(mapKey, getTypeFromSchema(propSchema))
+          if (propSpec != null) {
+            classProps = classProps ++ List(propSpec)
+          }
+        }
       }
       val newClassSpec = ClassSpecification(name)
       newClassSpec.setProperties(classProps)

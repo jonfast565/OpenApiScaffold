@@ -123,6 +123,11 @@ object OpenApiSpecificationConverter {
   }
 
   private def getPathResult(response: responses.ApiResponse, statusCode: String): PathResponse = {
+    val defaultPathResponse = new PathResponse {
+      setType(`type` = new ResolvedType(FieldType.None, AggregateType.None, null))
+      setStatusCode("200")
+    }
+
     try {
       val objectSchemaContent = response.getContent
       if (objectSchemaContent != null) {
@@ -134,8 +139,8 @@ object OpenApiSpecificationConverter {
             setType(`type`)
             setStatusCode(statusCode)
           }
-        } else null
-      } else null
+        } else defaultPathResponse
+      } else defaultPathResponse
     } catch {
       case e: Exception =>
         throw e

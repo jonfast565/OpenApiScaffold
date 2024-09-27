@@ -7,7 +7,6 @@ object CSharpTypeMapper {
   def getPropertyFieldType(`type`: ResolvedType): String = {
     val typeString = `type`.fieldType match
       case FieldType.LongInteger => "long"
-      case FieldType.None => throw new Exception("No field type found")
       case FieldType.Integer => "int"
       case FieldType.DateTime => "DateTime"
       case FieldType.Object => "JsonDocument"
@@ -17,6 +16,7 @@ object CSharpTypeMapper {
       case FieldType.Boolean => "bool"
       case FieldType.EmailAddress => "string"
       case FieldType.String => "string"
+      case FieldType.None => ""
 
     val aggString = `type`.aggregateType match
       case AggregateType.None => typeString

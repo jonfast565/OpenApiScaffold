@@ -51,7 +51,7 @@ object SimplifiedPathSpecMapper {
       .collectFirst(x => x)
       .orNull
 
-    val responses = pathSpecification.responses.map(responseMapper).toList
+    val responses = pathSpecification.responses.map(responseMapper)
 
     val allVariables = pathList ++ queryList ++ (if body != null then List(body) else List())
     val queryLinkedList = util.LinkedList[SimplifiedPathVar](queryList.asJava)

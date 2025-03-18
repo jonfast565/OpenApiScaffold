@@ -1,0 +1,5 @@
+public partial interface IApiClient {
+{{#each paths}}
+    Task{{#each responses}}<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}>{{/each}} {{pathName}}({{#each allVariables}}{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}} {{name}}{{#unless @last}},{{/unless}} {{/each}});
+{{/each}}
+}

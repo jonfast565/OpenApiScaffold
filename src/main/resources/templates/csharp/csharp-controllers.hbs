@@ -1,18 +1,36 @@
 using System;
+using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.JsonPatch.Operations;
+using Microsoft.AspNetCore.Mvc;
+using Firehose.Models;
+using Firehose.Models.MacAddressProvisioning;
+using Firehose.Models.SupplyChainManagement;
+using CoreSharedModels;
 
-using namespace ApiClients;
+namespace ApiClients;
 
 public partial class {{apiName}}Client
 {
 {{#each paths}}
-    public async Task{{#if responses}}{{#each responses}}{{#if (or customType fieldType)}}<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}>{{/if}}{{/each}}{{/if}} {{pathName}}({{#each allVariables}}{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}} {{name}}{{#unless @last}},{{/unless}} {{/each}})
+    public async Task{{#if responses}}{{#each responses}}{{#if (or customType fieldType)}}<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}?>{{/if}}{{/each}}{{/if}} {{pathName}}({{#each allVariables}}{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}} {{name}}{{#unless @last}},{{/unless}} {{/each}})
     {
         try
         {
+            {{#if (and pathList queryList)}}
             var url = $"{{url}}";
+            {{else if (and (not pathList) queryList)}}
+            var url = "{{url}}";
+            {{else if (and pathList (not queryList))}}
+            var url = $"{{url}}";
+            {{else if (and (not pathList) (not queryList))}}
+            const string url = "{{url}}";
+            {{else}}
+            const string url = "{{url}}";
+            {{/if}}
             {{#if queryList}}var paramDict = new Dictionary<string, string> { {{#each queryList}}
                 { "{{name}}", {{name}}.ToString() }{{#unless @last}},{{/unless}}{{/each}}
             };
@@ -27,18 +45,19 @@ public partial class {{apiName}}Client
             {{else}}
             var request = BuildRequest(url, HttpMethod.{{operationType}});
             {{/if}}
-            var client = _clientFactory.CreateClient();
+            var client = ClientFactory.CreateClient();
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             {{#each responses}}
                 {{#if (or customType fieldType)}}
-            if (response.IsSuccessStatusCode && response.StatusCode != HttpStatusCode.NoContent)
+            if (!response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NoContent)
             {
-                var responseContent = await response.Content.ReadAsStreamAsync();
-                var result = JsonSerializer.Deserialize<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}>(responseContent, JsonSerializerOptions);
-                return result;
+                return null;
             }
-            return null;
+
+            var responseContent = await response.Content.ReadAsStreamAsync();
+            var result = JsonSerializer.Deserialize<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}>(responseContent, JsonSerializerOptions);
+            return result;
                 {{/if}}
             {{/each}}
         }
@@ -48,3 +67,4 @@ public partial class {{apiName}}Client
         }
     }
 {{/each}}
+}

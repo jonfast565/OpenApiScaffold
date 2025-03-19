@@ -59,7 +59,7 @@ public partial class {{apiName}}Client
         string url,
         HttpMethod httpMethod,
         HttpContent? content = null,
-        MediaTypeHeaderValue? contentMediaType = null)
+        MediaTypeHeaderValue contentMediaType = null)
     {
         url = $"{BaseAddress}{url}";
 

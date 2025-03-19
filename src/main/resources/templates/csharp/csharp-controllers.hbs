@@ -5,32 +5,10 @@ using System.Threading.Tasks;
 
 using namespace ApiClients;
 
-public class ApiClient
+public partial class {{apiName}}Client
 {
-    const string DefaultBaseAddress = "{{baseAddress}}";
-
-    public string BaseAddress { get; set; }
-    public HttpClient Client { get; set; }
-    public ILogger Logger { get; set; }
-
-    public ApiClient(string baseAddress, ILogger<ApiClient> logger)
-    {
-        if (string.IsNullOrEmpty(baseAddress))
-        {
-            BaseAddress = DefaultBaseAddress;
-        }
-        else
-        {
-            BaseAddress = baseAddress;
-        }
-
-        Client = new HttpClient();
-        Client.BaseAddress = new Uri(BaseAddress);
-        Logger = logger;
-    }
-
 {{#each paths}}
-    public async Task{{#each responses}}< {{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}} >{{/each}} {{pathName}}({{#each allVariables}}{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}} {{name}}{{#unless @last}},{{/unless}} {{/each}})
+    public async Task{{#if responses}}{{#each responses}}{{#if (or customType fieldType)}}<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}>{{/if}}{{/each}}{{/if}} {{pathName}}({{#each allVariables}}{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}} {{name}}{{#unless @last}},{{/unless}} {{/each}})
     {
         try
         {
@@ -42,25 +20,27 @@ public class ApiClient
             var queryString = await formEncodedContent.ReadAsStringAsync();
             url = $"{url}?{queryString}";
             {{/if}}
-            var request = new HttpRequestMessage(HttpMethod.{{operationType}}, url);
-            request.Headers.Add("Accept", "application/json");
             {{#if body}}
             var jsonBody = JsonSerializer.Serialize(body);
-            request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+            var request = BuildRequest(url, HttpMethod.{{operationType}}, content);
+            {{else}}
+            var request = BuildRequest(url, HttpMethod.{{operationType}});
             {{/if}}
+            var client = _clientFactory.CreateClient();
             var response = await Client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             {{#each responses}}
+                {{#if (or customType fieldType)}}
             var responseContent = await response.Content.ReadAsStreamAsync();
-            var result = JsonSerializer.Deserialize<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}>(responseContent);
+            var result = JsonSerializer.Deserialize<{{#if customType}}{{customType}}{{else}}{{fieldType}}{{/if}}{{#if isArray}}[]{{/if}}>(responseContent, JsonSerializerOptions);
             return result;
+                {{/if}}
             {{/each}}
         }
         catch (HttpRequestException e)
         {
-            throw new Exception("Call to endpoint " +
-                                $"{{url}} failed.", e);
+            throw new Exception("Call to endpoint " + $"{{url}} failed.", e);
         }
     }
 {{/each}}
-}

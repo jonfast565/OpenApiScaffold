@@ -1,7 +1,7 @@
 package com.jfast
 package models.generators.simplifiedmodels
 
-import models.generators.simplifiedmodels.SimplifiedResponse
+import com.jfast.utilities.ControllerUtilities
 
 import java.util
 
@@ -16,5 +16,5 @@ class SimplifiedPathSpec (
                            val responses: java.util.LinkedList[SimplifiedResponse]
                          ) {
 
-  def getControllerName(): String = ControllerUtils.getControllerName(url)
+  def controllerName(): String = ControllerUtilities.getControllerName(url)
 }

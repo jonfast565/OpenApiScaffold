@@ -5,11 +5,16 @@ import models.generators.simplifiedmodels.SimplifiedResponse
 
 import java.util
 
-class SimplifiedPathSpec (val pathName: String,
-                          val url: String,
-                          val operationType: String,
-                          val pathList: util.LinkedList[SimplifiedPathVar],
-                          val queryList: util.LinkedList[SimplifiedPathVar],
-                          val body: SimplifiedPathVar,
-                          val allVariables: util.LinkedList[SimplifiedPathVar],
-                          val responses: util.LinkedList[SimplifiedResponse])
+class SimplifiedPathSpec (
+                           val pathName: String,
+                           val url: String,
+                           val operationType: String,
+                           val pathList: java.util.LinkedList[SimplifiedPathVar],
+                           val queryList: java.util.LinkedList[SimplifiedPathVar],
+                           val body: SimplifiedPathVar,
+                           val allVariables: java.util.LinkedList[SimplifiedPathVar],
+                           val responses: java.util.LinkedList[SimplifiedResponse]
+                         ) {
+
+  def getControllerName(): String = ControllerUtils.getControllerName(url)
+}

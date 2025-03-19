@@ -2,6 +2,8 @@ package com.jfast
 package utilities
 
 import java.io.{BufferedWriter, FileWriter, IOException}
+import java.util
+import scala.jdk.CollectionConverters.*
 
 object GeneralUtilities {
   def stringIsNullOrEmptyOrBlank(s: String): Boolean = s == null || s.isEmpty || s.trim().isEmpty
@@ -40,4 +42,9 @@ object GeneralUtilities {
 
   def removePropComponentString(propReferenceTypeName: String): String =
     propReferenceTypeName.replace("#/components/schemas/", "").trim()
+
+  def createJavaMap[T](scalaMap: Map[String, List[T]]): java.util.Map[String, java.util.LinkedList[T]] = {
+    val resultMap = scalaMap.map { case (key, value) => key -> new java.util.LinkedList(value.asJava) }
+    resultMap.asJava
+  }
 }

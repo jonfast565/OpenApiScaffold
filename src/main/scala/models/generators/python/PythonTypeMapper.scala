@@ -4,10 +4,10 @@ package models.generators.python
 import models.openapi.{FieldType, AggregateType, ResolvedType}
 
 object PythonTypeMapper {
-  def getPropertyFieldType(`type`: ResolvedType) = {
+  def getPropertyFieldType(`type`: ResolvedType): String = {
     val typeString = `type`.fieldType match
       case FieldType.LongInteger => "int"
-      case FieldType.None => throw new Exception("No field type found")
+      case FieldType.None => ""
       case FieldType.Integer => "int"
       case FieldType.DateTime => "datetime.DateTime"
       case FieldType.Object => "dict"

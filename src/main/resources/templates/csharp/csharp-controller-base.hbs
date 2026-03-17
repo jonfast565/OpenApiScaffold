@@ -1,0 +1,81 @@
+using System;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+
+using namespace ApiClients;
+
+public partial class {{apiName}}Client
+{
+    const string DefaultBaseAddress = "{{baseAddress}}";
+
+    public string BaseAddress { get; set; }
+    public string ApiKey { get; set; }
+    public IHttpClientFactory ClientFactory { get; set; }
+    public ILogger<{{apiName}}Client> Logger { get; set; }
+    public static readonly JsonSerializerOptions JsonSerializerOptions;
+
+    static {{apiName}}Client()
+    {
+        JsonSerializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
+        JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        // JsonSerializerOptions.Converters.Add(new GeoJsonConverterFactory());
+    }
+
+    public {{apiName}}Client(string apiKey, string baseAddress, IHttpClientFactory clientFactory, ILogger<{{apiName}}Client> logger)
+    {
+        if (string.IsNullOrEmpty(baseAddress))
+        {
+            BaseAddress = DefaultBaseAddress;
+        }
+        else
+        {
+            BaseAddress = baseAddress;
+        }
+
+        if (string.IsNullOrEmpty(apiKey))
+        {
+            throw new ArgumentNullException(nameof(apiKey));
+        }
+        else
+        {
+            ApiKey = apiKey;
+        }
+
+        ClientFactory = clientFactory;
+        Logger = logger;
+    }
+
+    private HttpRequestMessage BuildRequest(string url)
+    {
+        return BuildRequest(url, HttpMethod.Get);
+    }
+
+    private HttpRequestMessage BuildRequest(
+        string url,
+        HttpMethod httpMethod,
+        HttpContent? content = null,
+        MediaTypeHeaderValue contentMediaType = null)
+    {
+        url = $"{BaseAddress}{url}";
+
+        var request = new HttpRequestMessage(httpMethod, url);
+        request.Headers.Add("Accept", "*/*");
+        request.Headers.Add("User-Agent", Consts.UserAgent);
+        request.Headers.Add("x-wl-api-key", ApiKey);
+
+        if (content == null)
+        {
+            return request;
+        }
+
+        request.Content = content;
+        request.Content.Headers.ContentType = contentMediaType;
+
+        return request;
+    }
+}

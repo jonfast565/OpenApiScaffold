@@ -30,9 +30,14 @@ object OpenApiSpecificationConverter {
     for ((name, schema) <- objects.asScala) {
       var classProps = List[PropertySpecification]()
       val properties = schema.getProperties
+      if (properties != null) {
       for ((property, propSchema) <- properties.asScala) {
         val mapKey = property
-        classProps = classProps ++ List(PropertySpecification(mapKey, getTypeFromSchema(propSchema)))
+          val propSpec = PropertySpecification(mapKey, getTypeFromSchema(propSchema))
+          if (propSpec != null) {
+            classProps = classProps ++ List(propSpec)
+          }
+        }
       }
       val newClassSpec = ClassSpecification(name)
       newClassSpec.setProperties(classProps)
@@ -118,16 +123,24 @@ object OpenApiSpecificationConverter {
   }
 
   private def getPathResult(response: responses.ApiResponse, statusCode: String): PathResponse = {
+    val defaultPathResponse = new PathResponse {
+      setType(`type` = new ResolvedType(FieldType.None, AggregateType.None, null))
+      setStatusCode("200")
+    }
+
     try {
-      val objectSchema = response.getContent.get("application/json")
-      if (objectSchema != null) {
-        val actualSchema = objectSchema.getSchema
-        val `type` = getTypeFromSchema(actualSchema)
-        new PathResponse() {
-          setType(`type`)
-          setStatusCode(statusCode)
-        }
-      } else null
+      val objectSchemaContent = response.getContent
+      if (objectSchemaContent != null) {
+        val objectSchema = objectSchemaContent.get("application/json")
+        if (objectSchema != null) {
+          val actualSchema = objectSchema.getSchema
+          val `type` = getTypeFromSchema(actualSchema)
+          new PathResponse() {
+            setType(`type`)
+            setStatusCode(statusCode)
+          }
+        } else defaultPathResponse
+      } else defaultPathResponse
     } catch {
       case e: Exception =>
         throw e
